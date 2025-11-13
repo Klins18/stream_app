@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCSPstream - Mi Perfil</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>UCSPstream</h2>
+                <div class="ucsp-logo">
+                    <small>Mi Perfil</small>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="nav-link">Inicio</a></li>
+                    <li><a href="profile.html" class="nav-link active">Perfil</a></li>
+                    <li><a href="music.html" class="nav-link">Música</a></li>
+                    <li><a href="movies.html" class="nav-link">Películas</a></li>
+                    <li><a href="books.html" class="nav-link">Libros</a></li>
+                    <li class="nav-separator"></li>
+                    <li><a href="#" id="logoutBtn" class="nav-link logout">Cerrar Sesión</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="content-header">
+                <h1>Mi Perfil</h1>
+                <div class="user-info">
+                    <span id="userWelcome"></span>
+                </div>
+            </header>
+
+            <div class="profile-container">
+                <!-- Sección Foto de Perfil -->
+                <div class="profile-section">
+                    <h2>Foto de Perfil</h2>
+                    <div class="profile-picture-section">
+                        <div class="profile-picture-container">
+                            <img id="profilePicture" src="" alt="Foto de perfil" class="profile-picture">
+                            <div class="profile-picture-overlay">
+                                <label for="profilePictureInput" class="change-photo-btn">
+                                    📷 Cambiar Foto
+                                </label>
+                            </div>
+                        </div>
+                        <input type="file" id="profilePictureInput" accept="image/*" style="display: none;">
+                        <div class="picture-actions">
+                            <button id="uploadPictureBtn" class="btn-primary">Subir Foto</button>
+                            <button id="removePictureBtn" class="btn-secondary">Eliminar Foto</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sección Información Personal -->
+                <div class="profile-section">
+                    <h2>Información Personal</h2>
+                    <form id="profileForm" class="profile-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="username">Nombre de Usuario *</label>
+                                <input type="text" id="username" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Correo Electrónico</label>
+                                <input type="email" id="email" disabled>
+                                <small class="field-info">El email no se puede cambiar</small>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="fullName">Nombre Completo</label>
+                                <input type="text" id="fullName" placeholder="Tu nombre completo">
+                            </div>
+                            <div class="form-group">
+                                <label for="phone">Teléfono</label>
+                                <input type="tel" id="phone" placeholder="+51 XXX XXX XXX">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bio">Biografía</label>
+                            <textarea id="bio" placeholder="Cuéntanos sobre ti..." rows="4"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Redes Sociales</label>
+                            <div class="social-inputs">
+                                <div class="social-input">
+                                    <span class="social-icon">📘</span>
+                                    <input type="url" id="facebook" placeholder="Facebook URL">
+                                </div>
+                                <div class="social-input">
+                                    <span class="social-icon">📷</span>
+                                    <input type="url" id="instagram" placeholder="Instagram URL">
+                                </div>
+                                <div class="social-input">
+                                    <span class="social-icon">🐦</span>
+                                    <input type="url" id="twitter" placeholder="Twitter URL">
+                                </div>
+                                <div class="social-input">
+                                    <span class="social-icon">💼</span>
+                                    <input type="url" id="linkedin" placeholder="LinkedIn URL">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Guardar Cambios</button>
+                            <button type="button" id="cancelBtn" class="btn-secondary">Cancelar</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Sección Estadísticas -->
+                <div class="profile-section">
+                    <h2>Mis Estadísticas</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="contentCount">0</div>
+                            <div class="stat-label">Contenido Subido</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="approvedCount">0</div>
+                            <div class="stat-label">Aprobados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="pendingCount">0</div>
+                            <div class="stat-label">Pendientes</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="memberSince">-</div>
+                            <div class="stat-label">Miembro desde</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    <div id="message" class="message hidden"></div>
+
+    <script src="js/profile.js"></script>
+</body>
+</html>

@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 const db = require('./models/database');
+const { uploadFiles, handleUploadErrors } = require('./middleware/upload');
 
 const app = express();
 
@@ -113,14 +114,7 @@ app.post('/api/auth/login', checkDB, async (req, res) => {
             return res.status(401).json({ error: 'Credenciales inválidas' });
         }
 
-        // Para el usuario admin de prueba (password sin encriptar en la BD inicial)
-        let validPassword;
-        if (user.email === 'admin@ucsp.edu' && password === 'password') {
-            validPassword = true;
-        } else {
-            validPassword = await bcrypt.compare(password, user.password);
-        }
-
+        const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
             return res.status(401).json({ error: 'Credenciales inválidas' });
         }
@@ -182,45 +176,59 @@ app.get('/api/content/recent', auth, checkDB, async (req, res) => {
     }
 });
 
-// Obtener contenido por ID
-app.get('/api/content/:id', auth, checkDB, async (req, res) => {
-    try {
-        const { id } = req.params;
-        
-        const result = await db.cluster.query(
-            `SELECT * FROM \`mediaapp\` WHERE id = $1`,
-            [`content::${id}`]
-        );
-        
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'Contenido no encontrado' });
-        }
-        
-        res.json(result.rows[0]);
-    } catch (error) {
-        console.error('Content by ID error:', error);
-        res.status(500).json({ error: 'Error al obtener contenido' });
-    }
-});
-
-// Subir nuevo contenido (solo artistas y admin)
-app.post('/api/content', auth, checkDB, async (req, res) => {
+// Subir contenido multimedia
+app.post('/api/content/upload', auth, checkDB, uploadFiles, handleUploadErrors, async (req, res) => {
     try {
         if (req.user.role !== 'artist' && req.user.role !== 'admin') {
             return res.status(403).json({ error: 'No autorizado para subir contenido' });
         }
 
         const { title, description, type, duration, genre } = req.body;
+        
+        if (!title || !type) {
+            return res.status(400).json({ error: 'Título y tipo son requeridos' });
+        }
+
+        // Verificar que se subió el archivo correcto
+        let fileField = null;
+        switch(type) {
+            case 'music':
+                fileField = 'musicFile';
+                break;
+            case 'movie':
+                fileField = 'movieFile';
+                break;
+            case 'book':
+                fileField = 'bookFile';
+                break;
+        }
+
+        if (!req.files || !req.files[fileField]) {
+            return res.status(400).json({ error: `Debes subir un archivo de ${type}` });
+        }
+
+        // Determinar rutas de archivos
+        let filePath = null;
+        let thumbnailPath = null;
+
+        if (req.files[fileField]) {
+            filePath = `/uploads/${type}s/${req.files[fileField][0].filename}`;
+        }
+        
+        if (req.files.thumbnail) {
+            thumbnailPath = `/uploads/thumbnails/${req.files.thumbnail[0].filename}`;
+        }
 
         const contentData = {
             title,
-            description,
+            description: description || '',
             type,
-            duration,
-            genre,
+            duration: duration || '',
+            genre: genre || '',
+            file_path: filePath,
+            thumbnail: thumbnailPath || `https://via.placeholder.com/200x120/1a1a2e/00a8ff?text=${encodeURIComponent(title)}`,
             artist_id: req.user.userId,
             status: req.user.role === 'admin' ? 'approved' : 'pending',
-            thumbnail: `https://via.placeholder.com/200x120/1a1a2e/00a8ff?text=${encodeURIComponent(title)}`,
             created_at: new Date().toISOString()
         };
 
@@ -229,11 +237,50 @@ app.post('/api/content', auth, checkDB, async (req, res) => {
 
         res.status(201).json({
             id: contentId,
-            ...contentData
+            ...contentData,
+            message: req.user.role === 'admin' ? 'Contenido subido y aprobado' : 'Contenido subido. Esperando aprobación.'
         });
+
     } catch (error) {
         console.error('Upload content error:', error);
         res.status(500).json({ error: 'Error al subir contenido' });
+    }
+});
+
+// Subir foto de perfil
+app.post('/api/users/profile/picture', auth, checkDB, uploadFiles, handleUploadErrors, async (req, res) => {
+    try {
+        if (!req.files || !req.files.profilePicture) {
+            return res.status(400).json({ error: 'No se subió ninguna imagen' });
+        }
+
+        const profilePicturePath = `/uploads/profile_pictures/${req.files.profilePicture[0].filename}`;
+        
+        await db.collection.mutateIn(req.user.userId, [
+            db.couchbase.MutateInSpec.upsert('profile_picture', profilePicturePath)
+        ]);
+
+        res.json({ 
+            message: 'Foto de perfil actualizada',
+            profile_picture: profilePicturePath
+        });
+    } catch (error) {
+        console.error('Profile picture upload error:', error);
+        res.status(500).json({ error: 'Error al subir foto de perfil' });
+    }
+});
+
+// Eliminar foto de perfil
+app.delete('/api/users/profile/picture', auth, checkDB, async (req, res) => {
+    try {
+        await db.collection.mutateIn(req.user.userId, [
+            db.couchbase.MutateInSpec.remove('profile_picture')
+        ]);
+
+        res.json({ message: 'Foto de perfil eliminada' });
+    } catch (error) {
+        console.error('Remove profile picture error:', error);
+        res.status(500).json({ error: 'Error al eliminar foto de perfil' });
     }
 });
 
@@ -259,126 +306,65 @@ app.get('/api/users/profile', auth, checkDB, async (req, res) => {
     }
 });
 
-// Actualizar perfil
+// Actualizar perfil completo
 app.put('/api/users/profile', auth, checkDB, async (req, res) => {
     try {
-        const { username } = req.body;
+        const { username, fullName, phone, bio, social } = req.body;
+        
+        const updates = {};
+        if (username) updates.username = username;
+        if (fullName) updates.full_name = fullName;
+        if (phone) updates.phone = phone;
+        if (bio) updates.bio = bio;
+        if (social) updates.social = social;
         
         await db.collection.mutateIn(req.user.userId, [
-            db.couchbase.MutateInSpec.upsert('username', username)
+            db.couchbase.MutateInSpec.upsert('username', username || ''),
+            db.couchbase.MutateInSpec.upsert('full_name', fullName || ''),
+            db.couchbase.MutateInSpec.upsert('phone', phone || ''),
+            db.couchbase.MutateInSpec.upsert('bio', bio || ''),
+            db.couchbase.MutateInSpec.upsert('social', social || {})
         ]);
 
-        res.json({ message: 'Perfil actualizado correctamente' });
+        res.json({ 
+            message: 'Perfil actualizado correctamente',
+            user: {
+                username,
+                full_name: fullName,
+                phone,
+                bio,
+                social
+            }
+        });
     } catch (error) {
         console.error('Update profile error:', error);
         res.status(500).json({ error: 'Error al actualizar perfil' });
     }
 });
 
-// Obtener todos los usuarios (solo admin)
-app.get('/api/admin/users', auth, checkDB, async (req, res) => {
+// Obtener contenido del artista
+app.get('/api/content/my', auth, checkDB, async (req, res) => {
     try {
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ error: 'No autorizado' });
-        }
-
-        const result = await db.cluster.query(
-            `SELECT id, username, email, role, status, created_at 
-             FROM \`mediaapp\` 
-             WHERE id LIKE 'user::%' AND id != $1`,
-            [req.user.userId]
-        );
-
-        // Remover passwords de la respuesta
-        const users = result.rows.map(user => {
-            const { password, ...userData } = user;
-            return userData;
-        });
-
-        res.json(users);
-    } catch (error) {
-        console.error('Get users error:', error);
-        res.status(500).json({ error: 'Error al obtener usuarios' });
-    }
-});
-
-// Contenido pendiente de aprobación (solo admin)
-app.get('/api/admin/content/pending', auth, checkDB, async (req, res) => {
-    try {
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ error: 'No autorizado' });
-        }
-
+        const { artistId } = req.query;
+        
         const result = await db.cluster.query(
             `SELECT * FROM \`mediaapp\` 
-             WHERE id LIKE 'content::%' AND status = 'pending'`
+             WHERE id LIKE 'content::%' AND artist_id = $1 
+             ORDER BY created_at DESC`,
+            [artistId || req.user.userId]
         );
 
         res.json(result.rows);
     } catch (error) {
-        console.error('Pending content error:', error);
-        res.status(500).json({ error: 'Error al obtener contenido pendiente' });
+        console.error('Get my content error:', error);
+        res.status(500).json({ error: 'Error al obtener contenido' });
     }
 });
 
-// Aprobar/rechazar contenido (solo admin)
-app.put('/api/admin/content/:id/status', auth, checkDB, async (req, res) => {
-    try {
-        if (req.user.role !== 'admin') {
-            return res.status(403).json({ error: 'No autorizado' });
-        }
+// Servir archivos subidos
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-        const { id } = req.params;
-        const { status } = req.body;
-
-        if (!['approved', 'rejected'].includes(status)) {
-            return res.status(400).json({ error: 'Estado inválido' });
-        }
-
-        await db.collection.mutateIn(`content::${id}`, [
-            db.couchbase.MutateInSpec.upsert('status', status)
-        ]);
-
-        res.json({ message: `Contenido ${status === 'approved' ? 'aprobado' : 'rechazado'}` });
-    } catch (error) {
-        console.error('Update content status error:', error);
-        res.status(500).json({ error: 'Error al actualizar estado del contenido' });
-    }
-});
-
-// Toggle favorito
-app.post('/api/content/:id/favorite', auth, checkDB, async (req, res) => {
-    try {
-        const { id } = req.params;
-        
-        // Aquí implementarías la lógica de favoritos
-        // Por ahora devolvemos un estado simulado
-        const isFavorite = Math.random() > 0.5;
-        
-        res.json({ isFavorite });
-    } catch (error) {
-        console.error('Favorite error:', error);
-        res.status(500).json({ error: 'Error al actualizar favoritos' });
-    }
-});
-
-// Stream de contenido
-app.get('/api/stream/:id', auth, checkDB, async (req, res) => {
-    try {
-        const { id } = req.params;
-        
-        // Por ahora simulamos la URL del archivo
-        // En producción aquí iría la lógica de streaming real
-        const streamUrl = `/api/content/file/${id}`;
-        
-        res.json({ streamUrl });
-    } catch (error) {
-        console.error('Stream error:', error);
-        res.status(500).json({ error: 'Error al preparar stream' });
-    }
-});
-
-// Servir archivos estáticos
+// Servir archivos estáticos del frontend
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
