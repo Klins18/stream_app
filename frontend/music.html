@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCSPstream - Música</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>UCSPstream</h2>
+                <div class="ucsp-logo">
+                    <small>Sistema UCSP</small>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="nav-link">Inicio</a></li>
+                    <li><a href="profile.html" class="nav-link">Perfil</a></li>
+                    <li><a href="music.html" class="nav-link active">Música</a></li>
+                    <li><a href="movies.html" class="nav-link">Películas</a></li>
+                    <li><a href="books.html" class="nav-link">Libros</a></li>
+                    <li class="nav-separator"></li>
+                    <li><a href="#" id="logoutBtn" class="nav-link logout">Cerrar Sesión</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="content-header">
+                <h1>Música UCSP</h1>
+                <div class="search-bar">
+                    <input type="text" id="musicSearch" placeholder="Buscar música...">
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <div class="filters">
+                    <button class="filter-btn active">Todo</button>
+                    <button class="filter-btn">Rock</button>
+                    <button class="filter-btn">Electrónica</button>
+                    <button class="filter-btn">Clásica</button>
+                    <button class="filter-btn">UCSP Bands</button>
+                </div>
+                <div class="content-cards" id="musicList">
+                    <!-- Lista de música se carga aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/content.js"></script>
+</body>
+</html>

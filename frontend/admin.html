@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCSPstream - Administrador</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>UCSPstream</h2>
+                <div class="ucsp-logo">
+                    <small>Panel Administrador</small>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="nav-link">Inicio</a></li>
+                    <li><a href="admin.html" class="nav-link active">Administración</a></li>
+                    <li><a href="profile.html" class="nav-link">Perfil</a></li>
+                    <li><a href="music.html" class="nav-link">Música</a></li>
+                    <li><a href="movies.html" class="nav-link">Películas</a></li>
+                    <li><a href="books.html" class="nav-link">Libros</a></li>
+                    <li class="nav-separator"></li>
+                    <li><a href="#" id="logoutBtn" class="nav-link logout">Cerrar Sesión</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="main-content">
+            <header class="content-header">
+                <h1>Panel de Administración</h1>
+                <div class="user-info">
+                    <span id="userWelcome"></span>
+                </div>
+            </header>
+
+            <div class="admin-panel">
+                <div class="admin-section">
+                    <h2>Gestión de Usuarios</h2>
+                    <div class="admin-cards">
+                        <div class="admin-card">
+                            <h3>Usuarios Registrados</h3>
+                            <div id="usersList">
+                                <p>Cargando usuarios...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="admin-section">
+                    <h2>Contenido Pendiente</h2>
+                    <div class="admin-cards">
+                        <div class="admin-card">
+                            <h3>Por Aprobar</h3>
+                            <div id="pendingContent">
+                                <p>Cargando contenido pendiente...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>

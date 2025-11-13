@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCSPstream - Artista</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>UCSPstream</h2>
+                <div class="ucsp-logo">
+                    <small>Panel Artista</small>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="nav-link">Inicio</a></li>
+                    <li><a href="artist.html" class="nav-link active">Mi Contenido</a></li>
+                    <li><a href="profile.html" class="nav-link">Perfil</a></li>
+                    <li><a href="music.html" class="nav-link">Música</a></li>
+                    <li><a href="movies.html" class="nav-link">Películas</a></li>
+                    <li><a href="books.html" class="nav-link">Libros</a></li>
+                    <li class="nav-separator"></li>
+                    <li><a href="#" id="logoutBtn" class="nav-link logout">Cerrar Sesión</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="main-content">
+            <header class="content-header">
+                <h1>Panel de Artista</h1>
+                <div class="user-info">
+                    <span id="userWelcome"></span>
+                </div>
+            </header>
+
+            <div class="artist-panel">
+                <div class="upload-section">
+                    <h2>Subir Nuevo Contenido</h2>
+                    <form id="uploadForm" class="upload-form">
+                        <div class="form-group">
+                            <input type="text" id="contentTitle" placeholder="Título del contenido" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="contentDescription" placeholder="Descripción" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <select id="contentType" required>
+                                <option value="">Tipo de contenido</option>
+                                <option value="music">Música</option>
+                                <option value="movie">Película</option>
+                                <option value="book">Libro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <input type="file" id="contentFile" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Subir Contenido</button>
+                    </form>
+                </div>
+
+                <div class="my-content-section">
+                    <h2>Mi Contenido</h2>
+                    <div id="myContentList">
+                        <p>Cargando tu contenido...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/artist.js"></script>
+</body>
+</html>

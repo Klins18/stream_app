@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCSPstream - Biblioteca</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>UCSPstream</h2>
+                <div class="ucsp-logo">
+                    <small>Sistema UCSP</small>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="dashboard.html" class="nav-link">Inicio</a></li>
+                    <li><a href="profile.html" class="nav-link">Perfil</a></li>
+                    <li><a href="music.html" class="nav-link">Música</a></li>
+                    <li><a href="movies.html" class="nav-link">Películas</a></li>
+                    <li><a href="books.html" class="nav-link active">Biblioteca</a></li>
+                    <li class="nav-separator"></li>
+                    <li><a href="#" id="logoutBtn" class="nav-link logout">Cerrar Sesión</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <header class="content-header">
+                <h1>Biblioteca Digital UCSP</h1>
+                <div class="search-bar">
+                    <input type="text" id="booksSearch" placeholder="Buscar libros...">
+                </div>
+            </header>
+
+            <div class="content-grid">
+                <div class="filters">
+                    <button class="filter-btn active">Todo</button>
+                    <button class="filter-btn">Textos UCSP</button>
+                    <button class="filter-btn">Investigación</button>
+                    <button class="filter-btn">Académicos</button>
+                    <button class="filter-btn">Literatura</button>
+                </div>
+                <div class="content-cards" id="booksList">
+                    <!-- Lista de libros se carga aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/content.js"></script>
+</body>
+</html>
